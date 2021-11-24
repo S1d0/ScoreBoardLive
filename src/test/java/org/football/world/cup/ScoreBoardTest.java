@@ -1,8 +1,6 @@
 package org.football.world.cup;
 
-import org.football.world.cup.domain.FootballTeam;
-import org.football.world.cup.domain.Game;
-import org.football.world.cup.domain.ScoreBoard;
+import org.football.world.cup.domain.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -17,7 +15,7 @@ public class ScoreBoardTest {
 
     @Before
     public void init() {
-        board = new ScoreBoard();
+        board = new FootballScoreBoard();
     }
 
     @Test
@@ -58,10 +56,10 @@ public class ScoreBoardTest {
         FootballTeam away = gameWithUpdatedScore.getAwayTeam();
 
         assertEquals(home.getTeamName(), "Mexico");
-        assertEquals(home.getScore(), 0);
+        assertEquals(gameWithUpdatedScore.getHomeScore(), 0);
 
         assertEquals(away.getTeamName(), "Canada");
-        assertEquals(away.getScore(), 5);
+        assertEquals(gameWithUpdatedScore.getAwayScore(), 5);
     }
 
     @Test
@@ -87,10 +85,10 @@ public class ScoreBoardTest {
         Game uruguayItalyGame = board.startGame("Uruguay", "Italy");
         Game argentinaAustralia = board.startGame("Argentina", "Australia");
 
-        board.updateScore(mexicoCanadaGame, new Score(0, 5));
-        board.updateScore(spainBrazilGame, new Score(10, 2));
-        board.updateScore(germanyFranceGame, new Score(2, 2));
-        board.updateScore(uruguayItalyGame, new Score(6, 6));
-        board.updateScore(argentinaAustralia, new Score(3, 1));
+        board.updateGameScore(mexicoCanadaGame, new Score(0, 5));
+        board.updateGameScore(spainBrazilGame, new Score(10, 2));
+        board.updateGameScore(germanyFranceGame, new Score(2, 2));
+        board.updateGameScore(uruguayItalyGame, new Score(6, 6));
+        board.updateGameScore(argentinaAustralia, new Score(3, 1));
     }
 }
