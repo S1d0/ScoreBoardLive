@@ -4,14 +4,16 @@ import org.football.world.cup.domain.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 public class ScoreBoardTest {
 
     private ScoreBoard board;
+    private static final LocalDateTime gameDate = LocalDateTime
+            .of(2021,11, 1, 10, 0, 0);
 
     @Before
     public void init() {
@@ -21,45 +23,47 @@ public class ScoreBoardTest {
     @Test
     public void shouldBePossibleToStarGame() {
         // When
-        board.startGame("Mexico", "Canada");
+        board.startGame("Mexico", "Canada", gameDate);
 
         // Then
         List<Game> activeGames = board.getActiveGames();
+        Game activeGame = activeGames.get(0);
+
         assertEquals(1, activeGames.size());
+        assertEquals(0, activeGame.getAwayScore());
+        assertEquals(0, activeGame.getHomeScore());
     }
 
     @Test
     public void shouldBePossibleToFinishGame() {
         // Given
-        Game startedGame = board.startGame("Mexico", "Canada");
+        Game startedGame = board.startGame("Mexico", "Canada", gameDate);
 
         // When
-        Game finishedGame = board.finishGame(startedGame);
+        board.finishGame(startedGame);
 
         // Then
-        assertFalse(finishedGame.isActive());
-        assertEquals(finishedGame, startedGame);
-        assertEquals(0, board.getActiveGames().size());
+        assertFalse(board.getActiveGames().contains(startedGame));
     }
 
     @Test
     public void shouldBePossibleToUpdateScoreOfGivenGame() {
         // Given
-        Game startedGame = board.startGame("Mexico", "Canada");
+        Game startedGame = board.startGame("Mexico", "Canada", gameDate);
 
         // When
-        board.updateGameScore(startedGame, new Score(0, 5));
+        board.updateGameScore(startedGame, Score.of(0, 5));
         Game gameWithUpdatedScore = board.getGame(startedGame);
 
         // Then
-        FootballTeam home = gameWithUpdatedScore.getHomeTeam();
-        FootballTeam away = gameWithUpdatedScore.getAwayTeam();
+        Team home = gameWithUpdatedScore.getHomeTeam();
+        Team away = gameWithUpdatedScore.getAwayTeam();
 
-        assertEquals(home.getTeamName(), "Mexico");
-        assertEquals(gameWithUpdatedScore.getHomeScore(), 0);
+        assertEquals("Mexico", home.getTeamName());
+        assertEquals(0, gameWithUpdatedScore.getHomeScore());
 
-        assertEquals(away.getTeamName(), "Canada");
-        assertEquals(gameWithUpdatedScore.getAwayScore(), 5);
+        assertEquals("Canada", away.getTeamName());
+        assertEquals(5, gameWithUpdatedScore.getAwayScore());
     }
 
     @Test
@@ -71,24 +75,26 @@ public class ScoreBoardTest {
         List<Game> games = board.getGamesSummary();
 
         // Then
-        Game expectedFirstGame = board.getGameByTeams("Urugua", "Italy");
+        Game expectedFirstGame = board.getGameByTeams("Uruguay", "Italy");
+        Game expectedSecondGame = board.getGameByTeams("Spain", "Brazil");
         Game expectedLastGame = board.getGameByTeams("Germany", "France");
 
         assertEquals(games.get(0), expectedFirstGame);
+        assertEquals(games.get(1), expectedSecondGame);
         assertEquals(games.get(games.size()-1), expectedLastGame);
     }
 
     private void addTestData() {
-        Game mexicoCanadaGame = board.startGame("Mexico", "Canada");
-        Game spainBrazilGame = board.startGame("Spain", "Brazil");
-        Game germanyFranceGame = board.startGame("Germany", "France");
-        Game uruguayItalyGame = board.startGame("Uruguay", "Italy");
-        Game argentinaAustralia = board.startGame("Argentina", "Australia");
+        Game uruguayItalyGame = board.startGame("Uruguay", "Italy", gameDate);
+        Game spainBrazilGame = board.startGame("Spain", "Brazil", gameDate.minusHours(1));
+        Game mexicoCanadaGame = board.startGame("Mexico", "Canada", gameDate.minusDays(1));
+        Game argentinaAustralia = board.startGame("Argentina", "Australia", gameDate.minusDays(1));
+        Game germanyFranceGame = board.startGame("Germany", "France", gameDate.minusDays(2));
 
-        board.updateGameScore(mexicoCanadaGame, new Score(0, 5));
-        board.updateGameScore(spainBrazilGame, new Score(10, 2));
-        board.updateGameScore(germanyFranceGame, new Score(2, 2));
-        board.updateGameScore(uruguayItalyGame, new Score(6, 6));
-        board.updateGameScore(argentinaAustralia, new Score(3, 1));
+        board.updateGameScore(mexicoCanadaGame, Score.of(0, 5));
+        board.updateGameScore(spainBrazilGame, Score.of(10, 2));
+        board.updateGameScore(germanyFranceGame, Score.of(2,2));
+        board.updateGameScore(uruguayItalyGame, Score.of(6, 6));
+        board.updateGameScore(argentinaAustralia, Score.of(3,1));
     }
 }
